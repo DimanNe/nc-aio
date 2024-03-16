@@ -8,9 +8,9 @@ fi
 
 # Run redis with a password if provided
 if [ -n "$REDIS_HOST_PASSWORD" ]; then
-    exec redis-server --requirepass "$REDIS_HOST_PASSWORD" --loglevel warning
+    exec redis-server --requirepass "$REDIS_HOST_PASSWORD" --loglevel notice
 else
-    exec redis-server --loglevel warning
+    exec redis-server --loglevel notice
 fi
 
 exec "$@"
