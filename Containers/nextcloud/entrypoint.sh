@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 # version_greater A B returns whether A > B
 version_greater() {
     [ "$(printf '%s\n' "$@" | sort -t '.' -n -k1,1 -k2,2 -k3,3 -k4,4 | head -n 1)" != "$1" ]
@@ -87,7 +87,7 @@ if ! [ -f "$NEXTCLOUD_DATA_DIR/skip.update" ]; then
         # Check if it skips a major version
         INSTALLED_MAJOR="${installed_version%%.*}"
         IMAGE_MAJOR="${image_version%%.*}"
-        
+
         if [ "$installed_version" != "0.0.0.0" ]; then
             # Write output to logfile.
             exec > >(tee -i "/var/www/html/data/update.log")
@@ -255,7 +255,7 @@ DATADIR_PERMISSION_CONF
                     # Set the installdat to 00 which will allow to skip staging and install the next major directly
                     # shellcheck disable=SC2001
                     INSTALLED_AT="$(echo "${INSTALLED_AT}" | sed "s|[0-9][0-9]$|00|")"
-                    php /var/www/html/occ config:app:set core installedat --value="${INSTALLED_AT}" 
+                    php /var/www/html/occ config:app:set core installedat --value="${INSTALLED_AT}"
                 fi
                 php /var/www/html/updater/updater.phar --no-interaction --no-backup
                 if ! php /var/www/html/occ -V || php /var/www/html/occ status | grep maintenance | grep -q 'true'; then
@@ -332,7 +332,7 @@ DATADIR_PERMISSION_CONF
             if [ -n "$STARTUP_APPS" ]; then
                 read -ra STARTUP_APPS_ARRAY <<< "$STARTUP_APPS"
                 for app in "${STARTUP_APPS_ARRAY[@]}"; do
-                    if ! echo "$app" | grep -q '^-'; then 
+                    if ! echo "$app" | grep -q '^-'; then
                         if [ -z "$(find /var/www/html/apps -type d -maxdepth 1 -mindepth 1 -name "$app" )" ]; then
                             # If not shipped, install and enable the app
                             php /var/www/html/occ app:install "$app"
@@ -722,14 +722,14 @@ if [ "$FULLTEXTSEARCH_ENABLED" = 'yes' ]; then
         php /var/www/html/occ app:enable fulltextsearch
     elif [ "$SKIP_UPDATE" != 1 ]; then
         php /var/www/html/occ app:update fulltextsearch
-    fi    
+    fi
     if ! [ -d "/var/www/html/custom_apps/fulltextsearch_elasticsearch" ]; then
         php /var/www/html/occ app:install fulltextsearch_elasticsearch
     elif [ "$(php /var/www/html/occ config:app:get fulltextsearch_elasticsearch enabled)" != "yes" ]; then
         php /var/www/html/occ app:enable fulltextsearch_elasticsearch
     elif [ "$SKIP_UPDATE" != 1 ]; then
         php /var/www/html/occ app:update fulltextsearch_elasticsearch
-    fi    
+    fi
     if ! [ -d "/var/www/html/custom_apps/files_fulltextsearch" ]; then
         php /var/www/html/occ app:install files_fulltextsearch
     elif [ "$(php /var/www/html/occ config:app:get files_fulltextsearch enabled)" != "yes" ]; then
@@ -786,3 +786,4 @@ fi
 
 # Remove the update skip file always
 rm -f "$NEXTCLOUD_DATA_DIR"/skip.update
+php occ log:manage --level 0
